@@ -1,0 +1,18 @@
+# Bartender AI Agent Requirements
+# Core SignalWire Agents
+signalwire-agents
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Optional: For advanced drink matching
+scikit-learn>=1.3.0
+numpy>=1.24.0
+
+# Optional: For payment processing (uncomment if needed)
+# stripe>=7.0.0
+# square>=30.0.0

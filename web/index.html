@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outback Bar - Order & Enjoy!</title>
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Outback Bar - Smart Drink Ordering">
+    <meta property="og:description" content="Order drinks with Max at Outback Bar. Cocktails, beer, wine, and more!">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/assets/logo.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="apple-touch-icon" href="/assets/favicon.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, rgba(26, 15, 10, 0.9) 0%, rgba(44, 24, 16, 0.9) 100%), 
+                        url('/background.png') center center / cover no-repeat fixed;
+            color: #f4e4c1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            position: relative;
+        }
+        
+        /* Bar Header */
+        .bar-header {
+            background: linear-gradient(90deg, #2c1810 0%, #3d241a 50%, #2c1810 100%);
+            border-bottom: 3px solid #d4af37;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        }
+        
+        .bar-header h1 {
+            font-size: 2.5rem;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            margin: 0;
+        }
+        
+        .bar-header p {
+            color: #f4e4c1;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        /* Happy Hour Banner */
+        .happy-hour-banner {
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+            display: none;
+        }
+        
+        .happy-hour-banner.active {
+            display: block;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .right-panel {
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #d4af37;
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #d4af37;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d4af37;
+        }
+
+        #video-container {
+            background: linear-gradient(135deg, #2c1810 0%, #3d241a 50%, #2c1810 100%);
+            border-radius: 15px;
+            width: 100%;
+            max-width: 810px;
+            max-height: 540px;
+            aspect-ratio: 1620 / 1080;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+            border: 2px solid #d4af37;
+            padding: 0;
+            margin: 0 auto;
+        }
+        
+        #video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #video-placeholder img {
+            max-width: 150px;
+            filter: sepia(1) saturate(2) hue-rotate(30deg);
+        }
+
+        /* Style SignalWire video */
+        #video-container video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            border-radius: 15px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #d4af37;
+            color: #1a0f0a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #f4d03f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.danger {
+            background: #8B0000;
+            color: white;
+        }
+
+        button.danger:hover {
+            background: #A52A2A;
+        }
+
+        /* Tab Display */
+        #tab-display {
+            min-height: 300px;
+        }
+
+        .tab-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid #d4af37;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .tab-item-name {
+            font-weight: 600;
+            color: #f4e4c1;
+        }
+
+        .tab-item-desc {
+            font-size: 0.85rem;
+            color: #b8a878;
+            font-style: italic;
+        }
+
+        .tab-item-price {
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .tab-totals {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #d4af37;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            font-size: 1.1rem;
+        }
+
+        .total-line.final {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1a0f0a;
+            background: #d4af37;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        #status {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 10px;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #d4af37;
+        }
+
+        /* Menu Display */
+        #menu-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .menu-category {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid #d4af37;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .menu-category-title {
+            font-weight: bold;
+            color: #d4af37;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 6px 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: translateX(3px);
+        }
+
+        .menu-item-info {
+            flex: 1;
+        }
+
+        .menu-item-name {
+            font-weight: 600;
+            color: #f4e4c1;
+            font-size: 0.9rem;
+        }
+        
+        .menu-item-desc {
+            color: #b8a878;
+            font-size: 0.75rem;
+            font-style: italic;
+        }
+
+        .menu-item-price {
+            color: #d4af37;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        /* ABV Indicator */
+        .abv-indicator {
+            display: inline-block;
+            font-size: 0.7rem;
+            color: #ff9800;
+            margin-left: 5px;
+        }
+
+        #result-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #d4af37;
+            color: #1a0f0a;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        #result-message.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .left-panel,
+            .right-panel {
+                width: 100%;
+                max-width: 810px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .bar-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .main-container {
+                padding: 10px;
+            }
+            
+            .left-panel,
+            .right-panel {
+                display: contents;
+            }
+            
+            #video-container {
+                order: 1;
+                margin-bottom: 20px;
+                max-height: 60vh;
+            }
+            
+            #status {
+                order: 2;
+            }
+            
+            #controls-card {
+                order: 3;
+            }
+            
+            #tab-display {
+                order: 4;
+            }
+            
+            #menu-card {
+                order: 5;
+                width: 100%;
+            }
+            
+            .card {
+                width: 100%;
+            }
+            
+            #menu-display {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bar-header">
+        <h1>🍸 Outback Bar</h1>
+        <p>Order & Enjoy Responsibly</p>
+    </div>
+    
+    <div class="happy-hour-banner" id="happy-hour-banner">
+        🎉 HAPPY HOUR! 20% off all cocktails until 7 PM! 🎉
+    </div>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <!-- Video/Avatar Section -->
+            <div id="video-container">
+                <div id="video-placeholder">
+                    <img src="/logo.png" alt="Outback Bar Logo" style="max-width: 200px; margin-bottom: 20px;">
+                    <p style="color: #d4af37; margin-top: 20px; font-size: 1.1rem;">Welcome to Outback Bar</p>
+                    <p style="color: #f4e4c1; font-size: 0.9rem;">Click "Start Ordering" to talk with Max</p>
+                </div>
+            </div>
+
+            <!-- Menu Display -->
+            <div class="card" id="menu-card">
+                <div class="card-title">Drink Menu</div>
+                <div id="menu-display">
+                    <!-- Menu will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <!-- Status Display -->
+            <div id="status">
+                Welcome to the bar! What can I get you?
+            </div>
+
+            <!-- Tab Display -->
+            <div class="card" id="tab-display">
+                <div class="card-title">Your Tab</div>
+                <div id="tab-items">
+                    <div style="text-align: center; color: #b8a878; padding: 50px;">
+                        Your drinks will appear here
+                    </div>
+                </div>
+                <div class="tab-totals" id="tab-totals" style="display: none;">
+                    <div class="total-line">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+                    <div class="total-line">
+                        <span>Tax:</span>
+                        <span id="tax">$0.00</span>
+                    </div>
+                    <div class="total-line final">
+                        <span>Total:</span>
+                        <span id="total">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Section -->
+            <div class="card" id="controls-card">
+                <div class="card-title">Controls</div>
+                <div class="controls">
+                    <button id="connectBtn">🎤 Start Ordering</button>
+                    <button id="hangupBtn" style="display:none;" class="danger">📞 End Call</button>
+                    <button id="muteBtn" style="display:none;">🔇 Mute</button>
+                </div>
+                <div style="margin-top: 15px;">
+                    <label>
+                        <input type="checkbox" id="startMuted"> Start muted
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Message Overlay -->
+    <div id="result-message"></div>
+
+    <!-- SignalWire SDK from CDN -->
+    <script src="https://cdn.signalwire.com/@signalwire/client"></script>
+    <!-- App Logic -->
+    <script src="/app.js"></script>
+</body>
+</html>
