@@ -788,6 +788,40 @@ class BartenderAgent(AgentBase):
             
             return result
     
+    def on_swml_request(self, request_data, callback_path, request=None):
+        """Override to dynamically set video URLs based on request origin"""
+        # Try to get the host from the request headers
+        host = None
+        protocol = "https"
+        
+        if request and hasattr(request, 'headers'):
+            host = request.headers.get('host')
+            # Check for X-Forwarded headers (in case of proxy)
+            forwarded_host = request.headers.get('x-forwarded-host')
+            if forwarded_host:
+                host = forwarded_host
+            
+            # Check protocol
+            forwarded_proto = request.headers.get('x-forwarded-proto')
+            if forwarded_proto:
+                protocol = forwarded_proto
+        
+        # If we found a host, update the video URLs
+        if host:
+            base_url = f"{protocol}://{host}"
+            # Use set_param to set individual params
+            self.set_param("video_idle_file", f"{base_url}/outback_idle.mp4")
+            self.set_param("video_talking_file", f"{base_url}/outback_talking.mp4")
+            print(f"Set video URLs to use host: {base_url}")
+        else:
+            # Fallback to relative URLs if no host header found
+            self.set_param("video_idle_file", "/outback_idle.mp4")
+            self.set_param("video_talking_file", "/outback_talking.mp4")
+            print("No host header found, using relative video URLs")
+        
+        # Call parent implementation
+        return super().on_swml_request(request_data, callback_path, request)
+    
     def get_app(self):
         """
         Override get_app to create custom app with all endpoints

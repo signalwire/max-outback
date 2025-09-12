@@ -260,13 +260,17 @@ async function connect() {
             handleUserEvent(params);
         });
         
+        // Get video container
+        const videoContainer = document.getElementById('video-container');
+        
         // Dial the bartender agent
         console.log('Dialing bartender agent...');
         roomSession = await client.dial({
             to: '/public/bartender',
-            rootElement: document.getElementById('video-container'),
+            rootElement: videoContainer,
             audio: true,
-            video: false
+            video: true,
+            negotiateVideo: true  // Important for video negotiation
         });
         
         console.log('Room session created:', roomSession);
@@ -293,6 +297,12 @@ async function connect() {
         
         // Start the call
         await roomSession.start();
+        
+        // Hide the video placeholder once video starts
+        const placeholder = document.getElementById('video-placeholder');
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
         
         // Handle initial mute state
         if (startMutedCheckbox.checked) {
@@ -347,15 +357,17 @@ function disconnect() {
     hangupBtn.style.display = 'none';
     muteBtn.style.display = 'none';
     
-    // Restore video placeholder
+    // Clear and restore placeholder
     const videoContainer = document.getElementById('video-container');
-    videoContainer.innerHTML = `
-        <div id="video-placeholder">
-            <img src="/logo.png" alt="Outback Bar Logo" style="max-width: 200px; margin-bottom: 20px;">
-            <p style="color: #d4af37; margin-top: 20px; font-size: 1.1rem;">Welcome to Outback Bar</p>
-            <p style="color: #f4e4c1; font-size: 0.9rem;">Click "Start Ordering" to talk with Max</p>
-        </div>
+    videoContainer.innerHTML = '';
+    const placeholder = document.createElement('div');
+    placeholder.id = 'video-placeholder';
+    placeholder.innerHTML = `
+        <img src="/logo.png" alt="Outback Bar Logo">
+        <p>Welcome to Outback Bar</p>
+        <p>Click "Start Ordering" to talk with Max</p>
     `;
+    videoContainer.appendChild(placeholder);
     
     updateStatus('Disconnected. Thanks for visiting Outback Bar!');
 }
@@ -406,15 +418,17 @@ async function hangup() {
     hangupBtn.style.display = 'none';
     muteBtn.style.display = 'none';
     
-    // Restore video placeholder
+    // Clear and restore placeholder
     const videoContainer = document.getElementById('video-container');
-    videoContainer.innerHTML = `
-        <div id="video-placeholder">
-            <img src="/logo.png" alt="Outback Bar Logo" style="max-width: 200px; margin-bottom: 20px;">
-            <p style="color: #d4af37; margin-top: 20px; font-size: 1.1rem;">Welcome to Outback Bar</p>
-            <p style="color: #f4e4c1; font-size: 0.9rem;">Click "Start Ordering" to talk with Max</p>
-        </div>
+    videoContainer.innerHTML = '';
+    const placeholder = document.createElement('div');
+    placeholder.id = 'video-placeholder';
+    placeholder.innerHTML = `
+        <img src="/logo.png" alt="Outback Bar Logo">
+        <p>Welcome to Outback Bar</p>
+        <p>Click "Start Ordering" to talk with Max</p>
     `;
+    videoContainer.appendChild(placeholder);
     
     updateStatus('Disconnected. Thanks for visiting Outback Bar!');
 }
