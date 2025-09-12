@@ -252,10 +252,10 @@ This project is based on the Holy Guacamole architecture and is provided for edu
 
 ## 🙏 Acknowledgments
 
-- Built with [SignalWire AI Agents](https://signalwire.com)
+- Built with [SignalWire AI Agents](https://ai.signalwire.com)
 - Inspired by the Holy Guacamole implementation
 - Uses SignalWire's WebRTC for real-time communication
 
 ---
 
-**Need Help?** Check the [SignalWire Documentation](https://docs.signalwire.com) or open an issue.
+**Need Help?** Check the [SignalWire Documentation](https://developer.signalwire.com) or open an issue.
