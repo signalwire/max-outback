@@ -1,0 +1,1 @@
+web: python bartender_agent.py --port ${PORT:-5000}
