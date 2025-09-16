@@ -306,7 +306,13 @@ class BartenderAgent(AgentBase):
             "water", "soda", "juice", "virgin", "mocktail",
             "that's all", "that's it", "I'm done", "nothing else", "I'm good"
         ])
-        
+
+        # Optional post-prompt URL from environment
+        post_prompt_url = os.environ.get("BARTENDER_POST_PROMPT_URL")
+        if post_prompt_url:
+            self.set_post_prompt("Summarize the conversation, including all details about the drink orders, tab total, any special requests, and customer preferences.")
+            self.set_post_prompt_url(post_prompt_url)
+
         # Initialize global data
         self.set_global_data({
             "bar_name": "Outback Bar",
